@@ -6,5 +6,5 @@ type statusType string
 const (
 	Open     = "open"
 	Approved = "approved"
-	Rejected = "rejected"
+	PaidOff  = "paidoff"
 )

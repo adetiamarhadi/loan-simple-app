@@ -10,12 +10,13 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS loans (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id int,
+    code VARCHAR(6) NOT NULL,
     amount decimal(19,2) NOT NULL,
     term int NOT NULL,
     interest decimal(19,2) NOT NULL,
     monthly_payment decimal(19,2) NOT NULL,
     total decimal(19,2) NOT NULL,
-    status TINYINT NOT NULL,
+    status VARCHAR(10) NOT NULL,
     updated_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)

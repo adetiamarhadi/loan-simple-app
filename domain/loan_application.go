@@ -1,25 +1,16 @@
 package domain
 
-import "time"
-
 // LoanApplication is data structure for loan application
 type LoanApplication struct {
-	FullName  string
-	BirthDate time.Time
-	Gender genderType
-	MobileNumber string
-	Email string
-	ApplicationNumber string
-	Status statusType
-	LoanAmount float64
-	LoanTerm int
-	LoanInterest float64
-	LoanInterestMonthlyAmount float64
-	LoanAmountTotal float64
-	PaidMonthlyCount int
-	NotPaidMonthlyCount int
-	PaidAmount float64
-	NotPaidAmount float64
-	DueDatePayment time.Time
-	LastPaymentDate time.Time 
+	ID int `db:"id" json:"-"`
+	FullName  string `db:"name" json:"full_name"`
+	MobileNumber string `db:"mobile_number" json:"mobile_number"`
+	Email string `db:"email" json:"email"`
+	ApplicationNumber string `db:"code" json:"loan_id"`
+	Status statusType `db:"status" json:"status"`
+	LoanAmount float64 `db:"amount" json:"loan_amount"`
+	LoanTerm int `db:"term" json:"loan_term"`
+	LoanInterest float64 `db:"interest" json:"loan_interest"`
+	MonthlyPayment float64 `db:"monthly_payment" json:"monthly_payment"`
+	Total float64 `db:"total" json:"total"`
 }
