@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -114,20 +115,27 @@ func updateLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func readLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var loanApplication domain.LoanApplication
+	// connect to db
+	db, err := sqlx.Connect("mysql", "root:root@tcp(127.0.0.1:3306)/core")
+    if err != nil {
+        log.Fatalln(err)
+	}
 
-	loanApplication.FullName = "Adetia"
-	loanApplication.MobileNumber = "6281200001111"
-	loanApplication.Email = "adet@mail.com"
-	loanApplication.ApplicationNumber = ps.ByName("applicationNumber")
-	loanApplication.Status = domain.Open
-	loanApplication.LoanAmount = 2000000
-	loanApplication.LoanTerm = 12
-	loanApplication.LoanInterest = 1.49
+	row := db.QueryRowx("SELECT l.id, u.name, u.mobile_number, u.email, l.code, l.status, l.amount, l.term, l.interest, l.monthly_payment, l.total FROM users u INNER JOIN loans l ON u.id = l.user_id WHERE l.code = ?", ps.ByName("applicationNumber"))
+
+	var loan domain.LoanApplication
+
+	err = row.StructScan(&loan)
+
+	if err != nil && err != sql.ErrNoRows {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "err411: fail to get loan detail")
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	json.NewEncoder(w).Encode(loanApplication)
+	json.NewEncoder(w).Encode(loan)
 }
 
 func approveLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
