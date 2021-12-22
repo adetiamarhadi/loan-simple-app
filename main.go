@@ -23,7 +23,6 @@ func main() {
 	router.GET("/loan/:applicationNumber", readLoan)
 	router.POST("/loan/:applicationNumber", approveLoan)
 	router.PUT("/loan/:applicationNumber", updateLoan)
-	router.DELETE("/loan/:applicationNumber", rejectLoan)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -168,10 +167,6 @@ func approveLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(loan)
-}
-
-func rejectLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "reject loan for application number : %s", ps.ByName("applicationNumber"))
 }
 
 func populateModelFromHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params, model interface{}) error {
