@@ -139,7 +139,35 @@ func readLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func approveLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "approve loan for application number : %s", ps.ByName("applicationNumber"))
+	// connect to db
+	db, err := sqlx.Connect("mysql", "root:root@tcp(127.0.0.1:3306)/core")
+    if err != nil {
+        log.Fatalln(err)
+	}
+
+	row := db.QueryRowx("SELECT l.id, u.name, u.mobile_number, u.email, l.code, l.status, l.amount, l.term, l.interest, l.monthly_payment, l.total FROM users u INNER JOIN loans l ON u.id = l.user_id WHERE l.code = ?", ps.ByName("applicationNumber"))
+
+	var loan domain.LoanApplication
+
+	err = row.StructScan(&loan)
+
+	if err == sql.ErrNoRows {
+		w.WriteHeader(http.StatusNotAcceptable)
+		fmt.Fprint(w, "err412: loan_id not found")
+		return
+	}
+
+	tx := db.MustBegin()
+	tx.NamedExec("UPDATE loans SET status = 'approved' WHERE code = :code", loan)
+	tx.Commit()
+
+	row = db.QueryRowx("SELECT l.id, u.name, u.mobile_number, u.email, l.code, l.status, l.amount, l.term, l.interest, l.monthly_payment, l.total FROM users u INNER JOIN loans l ON u.id = l.user_id WHERE l.code = ?", ps.ByName("applicationNumber"))
+
+	err = row.StructScan(&loan)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(loan)
 }
 
 func rejectLoan(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
